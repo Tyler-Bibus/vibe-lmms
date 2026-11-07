@@ -717,9 +717,14 @@ void Fader::paintLevels(QPaintEvent* ev, QPainter& painter, bool linear)
 void Fader::paintFaderTicks(QPainter& painter)
 {
 	painter.save();
-
-	const QPen zeroPen(QColor(255, 255, 255, 216), 2.5);
-	const QPen nonZeroPen(QColor(255, 255, 255, 128), 1.);
+	// Align antialiased strokes to physical pixel boundaries at fractional scales.
+	painter.setRenderHint(QPainter::Antialiasing);
+	const qreal dpr = painter.device()->devicePixelRatioF();
+	const auto strokePixels = [dpr](qreal width) { return qMax(1, qRound(width * dpr)); };
+	const int zeroPixels = strokePixels(2.5);
+	const int nonZeroPixels = strokePixels(1.0);
+	const QPen zeroPen(QColor(255, 255, 255, 216), zeroPixels / dpr);
+	const QPen nonZeroPen(QColor(255, 255, 255, 128), nonZeroPixels / dpr);
 
 	// We use the maximum dB value of the model to calculate the nearest multiple
 	// of the step size that we use to paint the ticks so that we know the start point.
@@ -733,8 +738,11 @@ void Fader::paintFaderTicks(QPainter& painter)
 	{
 		const auto scaledRatio = computeScaledRatio(i);
 		const auto maxHeight = height() - (height() - m_knobSize.height()) * scaledRatio - (m_knobSize.height() / 2);
+		const bool isZero = approximatelyEqual(i, 0.);
+		const int pixels = isZero ? zeroPixels : nonZeroPixels;
+		const qreal tickY = (std::round(maxHeight * dpr - pixels / 2.0) + pixels / 2.0) / dpr;
 
-		if (approximatelyEqual(i, 0.))
+		if (isZero)
 		{
 			painter.setPen(zeroPen);
 		}
@@ -743,8 +751,8 @@ void Fader::paintFaderTicks(QPainter& painter)
 			painter.setPen(nonZeroPen);
 		}
 
-		painter.drawLine(QPointF(0, maxHeight), QPointF(1, maxHeight));
-		painter.drawLine(QPointF(width() - 1, maxHeight), QPointF(width(), maxHeight));
+		painter.drawLine(QPointF(0, tickY), QPointF(1, tickY));
+		painter.drawLine(QPointF(width() - 1, tickY), QPointF(width(), tickY));
 	}
 
 	painter.restore();
