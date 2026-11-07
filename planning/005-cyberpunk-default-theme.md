@@ -1,7 +1,7 @@
 # VS-005: Portfolio-Inspired Cyberpunk Default Theme
 
-- Status: Planned
-- Branch: `vibe-sweep`
+- Status: In progress
+- Branch: `vibe-sweep-vs-005`
 - Depends on: [VS-002](002-high-dpi-scaling.md), [VS-003](003-vector-knobs-faders.md), [VS-004](004-dpi-aware-text.md)
 
 ## Goal and reference
@@ -39,4 +39,6 @@ The live page could not be rendered by the web fetch during planning. The portfo
 - [ ] `tests/scripted/check-strings` and final build/native tests pass; demo playback and interaction smoke checks pass.
 - [ ] Theme loading/restart and switching to classic and back are checked; final screenshots and any known gaps are recorded.
 
-Results: Not implemented or tested. Final integration completes the initial sweep only after all five issue checklists have evidence.
+Results: The default QSS now uses violet surfaces, lavender text, purple selection and grids, magenta focus, and accented default knobs. Existing instrument artwork colors and recording, clipping, and peak-meter colors are retained. All 24 referenced stylesheet images exist, and tinycss2 reports no stylesheet syntax errors. The post-change check-strings run could not start because the Carla submodule is absent from this worktree; it remains an integration check. The proposed primary text/panel contrast is 15.76:1, selected text/background 10.41:1, magenta focus/panel 6.05:1, and scrollbar handle/panel 3.23:1. Piano roll regular and selected note text contrast is at least 6.25:1 and 5.06:1 respectively at full brightness, and 10.41:1 and 9.02:1 at the configured opacity over the editor background.
+
+The baseline build, eight native tests, and three scripted checks passed before this change. Runtime Qt parsing, screenshots, theme switching, demo playback, and DPI checks remain for integration. Existing red step notes and pink current-step notes may have less than 4.5:1 text contrast at high volume because the painter normalizes color brightness; preserving their semantic colors leaves this for visual review or a code-level solution. Custom-painted surfaces and existing bitmap artwork may still retain their original colors. Final integration completes the initial sweep only after all five issue checklists have evidence.
