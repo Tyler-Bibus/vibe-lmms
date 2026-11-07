@@ -83,6 +83,8 @@ public slots:
 
 protected:
 	void paintEvent( QPaintEvent * pe ) override;
+	void changeEvent(QEvent* event) override;
+	bool event(QEvent* event) override;
 
 	virtual void updateSize();
 
