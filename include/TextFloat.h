@@ -56,11 +56,9 @@ public:
 
 	void moveGlobal(QWidget* w, const QPoint& offset);
 
-
 protected:
 	void mousePressEvent(QMouseEvent * me) override;
 	bool event(QEvent* event) override;
-
 
 private:
 	TextFloat(const QString & title, const QString & text, const QPixmap & pixmap);

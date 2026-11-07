@@ -5,13 +5,13 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+#include "LcdWidget.h"
+
 #include <QFontMetrics>
 #include <QImage>
 #include <QPainter>
 #include <QPixmapCache>
 #include <QtTest>
-
-#include "LcdWidget.h"
 
 using lmms::gui::LcdWidget;
 
@@ -63,7 +63,6 @@ private slots:
 		const QImage one = lcd.grab().toImage();
 		QVERIFY(zero != one);
 	}
-
 };
 
 QTEST_MAIN(LcdWidgetTest)

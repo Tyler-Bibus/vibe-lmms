@@ -24,15 +24,14 @@
 
 #include "TextFloat.h"
 
-#include <algorithm>
-
 #include <QEvent>
 #include <QGuiApplication>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QScreen>
 #include <QTimer>
-#include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <QLabel>
+#include <algorithm>
 
 #include "GuiApplication.h"
 #include "MainWindow.h"
@@ -119,12 +118,15 @@ void TextFloat::moveGlobal(QWidget* w, const QPoint& offset)
 		m_titleLabel->setMaximumWidth(textWidth);
 		m_textLabel->setMaximumWidth(textWidth);
 		adjustSize();
-		position.setX(std::clamp(position.x(), available.left(),
-			std::max(available.left(), available.right() - width() + 1)));
-		position.setY(std::clamp(position.y(), available.top(),
-			std::max(available.top(), available.bottom() - height() + 1)));
+		position.setX(
+			std::clamp(position.x(), available.left(), std::max(available.left(), available.right() - width() + 1)));
+		position.setY(
+			std::clamp(position.y(), available.top(), std::max(available.top(), available.bottom() - height() + 1)));
 	}
-	else { adjustSize(); }
+	else
+	{
+		adjustSize();
+	}
 	move(position);
 	m_positioning = false;
 }
@@ -133,12 +135,12 @@ bool TextFloat::event(QEvent* event)
 {
 	const auto type = event->type();
 	const bool result = QWidget::event(event);
-	if ((type == QEvent::FontChange || type == QEvent::ApplicationFontChange ||
-		type == QEvent::ScreenChangeInternal
+	if ((type == QEvent::FontChange || type == QEvent::ApplicationFontChange || type == QEvent::ScreenChangeInternal
 #if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
-		|| type == QEvent::DevicePixelRatioChange
+			|| type == QEvent::DevicePixelRatioChange
 #endif
-		) && m_anchor && !m_positioning)
+			)
+		&& m_anchor && !m_positioning)
 	{
 		// Defer until the inherited font and child layouts have received the event.
 		QTimer::singleShot(0, this, [this] {

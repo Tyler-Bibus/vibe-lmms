@@ -23,19 +23,16 @@
  *
  */
 
-
-
-#include <cmath>
+#include "LcdWidget.h"
 
 #include <QEvent>
 #include <QFontMetricsF>
-#include <QStyleOptionFrame>
 #include <QPainter>
+#include <QStyleOptionFrame>
+#include <cmath>
 
-#include "LcdWidget.h"
 #include "DeprecationHelper.h"
 #include "embed.h"
-
 
 namespace lmms::gui
 {
@@ -255,24 +252,21 @@ void LcdWidget::updateSize()
 	const QFontMetricsF metrics(font(), this);
 	const int labelWidth = m_label.isEmpty() ? 0 : static_cast<int>(std::ceil(metrics.horizontalAdvance(m_label))) + 2;
 	const int labelHeight = m_label.isEmpty() ? 0 : static_cast<int>(std::ceil(metrics.height())) + 1;
-	setFixedSize(qMax(m_cellWidth * m_numDigits + marginX1 + marginX2, labelWidth),
-		m_cellHeight + 2 * marginY + labelHeight);
+	setFixedSize(
+		qMax(m_cellWidth * m_numDigits + marginX1 + marginX2, labelWidth), m_cellHeight + 2 * marginY + labelHeight);
 
 	update();
 }
 
-
-
-
 void LcdWidget::changeEvent(QEvent* event)
 {
 	QWidget::changeEvent(event);
-	if ((event->type() == QEvent::FontChange || event->type() == QEvent::ApplicationFontChange) && !m_lcdPixmap.isNull())
+	if ((event->type() == QEvent::FontChange || event->type() == QEvent::ApplicationFontChange)
+		&& !m_lcdPixmap.isNull())
 	{
 		updateSize();
 	}
 }
-
 
 bool LcdWidget::event(QEvent* event)
 {
@@ -280,15 +274,15 @@ bool LcdWidget::event(QEvent* event)
 	const bool result = QWidget::event(event);
 	if ((type == QEvent::ScreenChangeInternal
 #if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
-		|| type == QEvent::DevicePixelRatioChange
+			|| type == QEvent::DevicePixelRatioChange
 #endif
-		) && !m_lcdPixmap.isNull())
+			)
+		&& !m_lcdPixmap.isNull())
 	{
 		updateSize();
 	}
 	return result;
 }
-
 
 void LcdWidget::initUi(const QString& name , const QString& style)
 {

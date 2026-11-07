@@ -742,10 +742,7 @@ void Fader::paintFaderTicks(QPainter& painter)
 		const int pixels = isZero ? zeroPixels : nonZeroPixels;
 		const qreal tickY = (std::round(maxHeight * dpr - pixels / 2.0) + pixels / 2.0) / dpr;
 
-		if (isZero)
-		{
-			painter.setPen(zeroPen);
-		}
+		if (isZero) { painter.setPen(zeroPen); }
 		else
 		{
 			painter.setPen(nonZeroPen);
