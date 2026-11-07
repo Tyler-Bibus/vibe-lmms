@@ -29,8 +29,8 @@ Use native QPainter vector rendering and antialiasing for crisp knob arcs, indic
 - [ ] Fader ticks on/off, linear/dB controls, peaks, and zero-dB marker remain correct.
 - [ ] Drag, wheel, fine adjustment, reset, automation, and context-menu interactions match VS-001.
 - [ ] Rapid control movement and active mixer repainting remain responsive during playback; compare CPU/repaint behavior to baseline.
-- [ ] Windows build/native tests pass; focused geometry tests are added only for new nontrivial logic.
+- [x] Windows build/native tests pass; focused geometry tests are added only for new nontrivial logic.
 
 Results: Knob arcs and indicators now paint directly with antialiasing in logical coordinates, without the low-resolution image cache. Legacy artwork sizing uses its logical size and disabled artwork retains its device pixel ratio. Fader ticks use antialiased strokes snapped to physical pixels; their dB mapping and zero marker remain unchanged. Input handling is unchanged.
 
-Theme-provided knob bodies and default or custom fader handles remain artwork for compatibility, so raster assets may still blur when enlarged. Direct drawing may affect repaint performance. The unchanged Windows baseline passed its build, eight native tests, and three scripted checks. This change passed `git diff --check` and static review; the integrated build, visual checks at each scale, interactions, monitor transitions, and playback performance remain to be verified.
+Theme-provided knob bodies and default or custom fader handles remain artwork for compatibility, so raster assets may still blur when enlarged. Direct drawing may affect repaint performance. The unchanged Windows baseline passed its build, eight native tests, and three scripted checks. This change passed `git diff --check` and static review. Integrated source `0b3f38b4` passed the Windows build, all nine native tests, all three scripted checks, and a non-silent demo render. Visual checks at each scale, control interactions, monitor transitions, and live repaint/playback performance remain unverified because interactive desktop access failed. See [the shared verification record](TRACKER.md).

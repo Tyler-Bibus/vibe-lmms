@@ -1,6 +1,7 @@
 # VS-001: Initial Windows Build and Test Baseline
 
-- Status: Native build and tests passed; GUI/audio smoke pending
+- Status: In progress
+- Implementation: native build, native/scripted tests, and command-line audio smoke completed; interactive acceptance pending
 - Branch: `vibe-sweep-vs-001`
 - Prerequisites: implementation requested by the owner
 - Next: [VS-002](002-high-dpi-scaling.md)
@@ -49,9 +50,9 @@ Resolve runtime DLL and Qt platform-plugin discovery using the matching Qt/vcpkg
 - [x] All native tests pass; counts and failures/skips are recorded.
 - [x] Scripted checks pass, or explicit blockers are recorded and resolved before accepting the baseline.
 - [ ] Local launch, demo playback, project round-trip, and screenshots recorded.
-- [ ] Existing defects are documented separately from later regressions.
+- [x] Existing defects are documented separately from later regressions.
 
-Results: Native build, all eight registered tests, and all scripted checks passed. GUI/audio smoke remains pending.
+Results: Native build, all eight registered tests, all scripted checks, and a non-silent command-line demo render passed. Interactive GUI checks and audio-device playback remain pending.
 
 ## Baseline execution (2026-11-07)
 
@@ -59,4 +60,8 @@ Source revision: `be5ac75e8d0fc43318d59452b785c623431f4c1d`. The application sou
 
 Scripted checks: `check-strings` and `check-namespace` passed on Windows with Python 3.13.3 and tinycss2 1.5.1 (zero errors each). `verify` initially failed on Windows with `WinError 32` while removing a temporary directory. It passed in WSL Ubuntu with an isolated `GIT_CONFIG_GLOBAL`; expected fixture errors in the log are assertions, followed by `SUCCESS`. No persistent global Git configuration was changed.
 
-The first configure completed dependency installation but failed because the installed MSVC 19.44 is below the project minimum 19.51. A workspace-local MSVC 14.51.36231 (compiler 19.51) was extracted from Microsoft VS 2026 channel packages; it uses the installed Windows SDK 10.0.26100 and the already built 14.44 vcpkg libraries. Local MSYS2 Perl 5.42.3 and its List::MoreUtils/XML::Parser modules satisfy the LADSPA generator. The portable setup disables the optional 32-bit VST bridge (`WANT_VST_32=OFF`); Qt 6, x64, RelWithDebInfo, official target architecture, and warnings-as-errors match the CI baseline. Compile caching was omitted. `configure-1451-perl.log` records successful configure and `build-1451.log` records all 1,462 build tasks completing successfully. `ctest.log` records 8/8 registered native tests passed, with matching CRT and Qt DLLs on PATH and `QT_QPA_PLATFORM=offscreen`. No tests were skipped. `install.log` and `windeployqt.log` record the staged installation; matching 14.51 CRT DLLs were copied app-local. The saved install is `build/vibe-sweep/baseline-install/lmms.exe`; use `QT_QPA_PLATFORM=windows` and an isolated config for GUI smoke. GUI launch, demo playback, project round-trip and screenshots remain pending; no claim of audio verification is made.
+The first configure completed dependency installation but failed because the installed MSVC 19.44 is below the project minimum 19.51. A workspace-local MSVC 14.51.36231 (compiler 19.51) was extracted from Microsoft VS 2026 channel packages; it uses the installed Windows SDK 10.0.26100 and the already built 14.44 vcpkg libraries. Local MSYS2 Perl 5.42.3 and its List::MoreUtils/XML::Parser modules satisfy the LADSPA generator. The portable setup disables the optional 32-bit VST bridge (`WANT_VST_32=OFF`); Qt 6, x64, RelWithDebInfo, official target architecture, and warnings-as-errors match the CI baseline. Compile caching was omitted. `configure-1451-perl.log` records successful configure and `build-1451.log` records all 1,462 build tasks completing successfully. `ctest.log` records 8/8 registered native tests passed, with matching CRT and Qt DLLs on PATH and `QT_QPA_PLATFORM=offscreen`. No tests were skipped. `install.log` and `windeployqt.log` record the staged installation; matching 14.51 CRT DLLs were copied app-local. The saved install is `build/vibe-sweep/baseline-install/lmms.exe`; use `QT_QPA_PLATFORM=windows` and an isolated config for GUI smoke.
+
+The initial staged launch was missing vcpkg runtime DLLs; copying the matching release DLLs app-local corrected command-line execution. A copied `Root84-TrancyLoop.mmpz` rendered successfully to explicit output paths, without modifying the bundled input. Baseline and integrated outputs each contain 477,440 stereo 16-bit frames at 44.1 kHz and nonzero PCM samples. Repeated unchanged baseline renders also produce different hashes, so byte equality is not used as a regression test. Both builds log Carla plugin DLL load failures; that pre-existing limitation is recorded separately from UI changes.
+
+Interactive GUI launch, demo playback through a physical audio device, project round-trip, and screenshots remain unverified because the Windows desktop helper failed native-pipe connection after recovery attempts. See [the global verification record](TRACKER.md) for integrated source and artifact locations.

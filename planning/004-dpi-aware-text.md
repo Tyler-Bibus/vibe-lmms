@@ -30,10 +30,11 @@ Replace inappropriate fixed pixel typography with dynamic sizing that responds t
 - [ ] Popup geometry, cursor/parent placement, screen bounds, timeout, and dismissal behavior remain correct.
 - [ ] No double scaling; application/system font changes produce consistent geometry.
 - [ ] Scope of any FontHelper or SimpleTextFloat change is documented; unrelated users are checked if shared behavior changes.
-- [ ] Build/native tests pass; screenshots and measured font/DPR values recorded.
+- [x] Build/native tests pass, including the new LCD regression test.
+- [ ] Screenshots and measured font/DPR values recorded on physical displays.
 
 Reference: [Qt high-DPI model](https://doc.qt.io/qt-6/highdpi.html).
 
 Results: Implemented inherited-font LCD label sizing and painting with font metrics, including space for descenders and shadow, and refreshes geometry on font and screen changes. TextFloat retains inherited fonts, wraps text to the target screen width, and repositions when its font or screen changes. SimpleTextFloat already inherits its font and remains unchanged. The LCD digit atlas remains raster artwork and was not replaced.
 
-Validation: Added an offscreen Qt regression test using a synthetic LCD atlas for font-dependent geometry and observable digit rendering. The unchanged Windows baseline passed before implementation. The new build and test, mixed-monitor behavior, screenshots, and measured font/DPR values remain pending integrated native and visual verification. Very large icons or content taller than the screen may still exceed available geometry.
+Validation: Added an offscreen Qt regression test using a synthetic LCD atlas for font-dependent geometry and observable digit rendering. The unchanged Windows baseline passed before implementation. Integrated source `0b3f38b4` passed its Windows build and all nine native tests, including this test. The LCD test also passed independently at `QT_SCALE_FACTOR=1`, `1.25`, `1.5`, and `2`. All three scripted checks passed. These are offscreen widget tests, not physical-monitor or interactive popup verification. Mixed-monitor behavior, screenshots, popup interaction, and measured physical font/DPR values remain pending because the desktop helper is unavailable. Very large icons or content taller than the screen may still exceed available geometry. See [the shared verification record](TRACKER.md).
