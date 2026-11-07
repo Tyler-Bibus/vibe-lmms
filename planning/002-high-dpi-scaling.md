@@ -1,6 +1,6 @@
 # VS-002: Reliable Windows High-DPI Scaling
 
-- Status: Planned
+- Status: In progress
 - Branch: `vibe-sweep`
 - Depends on: [VS-001](001-windows-baseline.md)
 
@@ -11,7 +11,7 @@ Make the Windows UI scale cleanly at fractional and integer display scales, incl
 ## Repository findings
 
 - [main.cpp](../src/core/main.cpp) already sets `Qt::AA_EnableHighDpiScaling` before application construction for Qt 5; its comment notes that Qt 6 enables scaling automatically.
-- [lmms.exe.manifest](../cmake/nsis/lmms.exe.manifest) declares `dpiAware=false`, and [the NSIS CMake file](../cmake/nsis/CMakeLists.txt) installs it. Its actual effect on the running executable must be verified; this is a suspected conflict, not a proven root cause.
+- The former `cmake/nsis/lmms.exe.manifest` declared `dpiAware=false` and was installed alongside the executable. The installer also set the system-wide `PreferExternalManifest` preference. Their actual effect on the running process was not measured; a conflict remains suspected rather than proven.
 - [embed.cpp](../src/gui/embed.cpp) uses the primary screen DPR for SVG rasterization. Window-specific DPI and cached images need inspection.
 
 ## Implementation plan
@@ -35,4 +35,6 @@ Make the Windows UI scale cleanly at fractional and integer display scales, incl
 
 [Qt high-DPI documentation](https://doc.qt.io/qt-6/highdpi.html) explains logical coordinates, raster buffer DPR, and Windows behavior. Consult the documentation matching the actual Qt baseline during implementation.
 
-Results: Not implemented or tested. Follow with [VS-003](003-vector-knobs-faders.md).
+Results: The installer no longer ships the external DPI-unaware manifest or sets the machine-wide `PreferExternalManifest` registry preference. It deletes a stale LMMS external manifest when installing over an existing copy; an existing registry preference is left untouched. Qt 5 now enables high-DPI pixmaps before application construction alongside its existing scaling attribute. Qt's platform integration determines process awareness; the effective mode still requires runtime measurement. SVG pixmaps still use the primary screen DPR and existing cached or retained pixmaps do not automatically refresh when windows move between screens.
+
+The unchanged Windows baseline built successfully (1462/1462), passed all eight CTest tests and all three scripted checks. For this change, `git diff --check` and `git apply --check` on the draft passed. A two-stage CMake string evaluation produced the intended NSIS upgrade command `Delete "$INSTDIR\lmms.exe.manifest"`; the full installer and changed application have not yet been built or exercised. Windows scale and mixed-monitor checks, installed-versus-build-tree awareness, screenshots, and a Qt 5 build remain pending. Follow with [VS-003](003-vector-knobs-faders.md).

@@ -20,15 +20,12 @@ SET(CPACK_NSIS_MENU_LINKS               "${CMAKE_PROJECT_NAME}.exe;${PROJECT_NAM
 SET(CPACK_NSIS_DEFINES                  "
   !addincludedir ${CMAKE_SOURCE_DIR}/cmake/nsis
   !include FileAssociation.nsh
-  !include LogicLib.nsh
-  !include WinVer.nsh")
+  !include LogicLib.nsh")
 SET(CPACK_PACKAGE_FILE_NAME             "${CMAKE_PROJECT_NAME}-${VERSION}-${WIN_PLATFORM}-win32")
 SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS   "
   \\\${registerExtension} \\\"$INSTDIR\\\\${CMAKE_PROJECT_NAME}.exe\\\" \\\".mmp\\\" \\\"${PROJECT_NAME_UCASE} Project\\\"
   \\\${registerExtension} \\\"$INSTDIR\\\\${CMAKE_PROJECT_NAME}.exe\\\" \\\".mmpz\\\" \\\"${PROJECT_NAME_UCASE} Project (compressed)\\\"
-  \\\${IfNot} \\\${AtMostWin7}
-    WriteRegDWORD HKLM \\\"Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\SideBySide\\\" \\\"PreferExternalManifest\\\" \\\"1\\\"
-  \\\${EndIf}
+  Delete \\\"$INSTDIR\\\\${CMAKE_PROJECT_NAME}.exe.manifest\\\"
   " PARENT_SCOPE)
 SET(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
   \\\${unregisterExtension} \\\".mmp\\\" \\\"${PROJECT_NAME_UCASE} Project\\\"
@@ -69,6 +66,5 @@ endif()
 CONFIGURE_FILE("lmms.rc.in"             "${CMAKE_BINARY_DIR}/lmms.rc")
 CONFIGURE_FILE("zynaddsubfx.rc.in"      "${CMAKE_BINARY_DIR}/plugins/ZynAddSubFx/zynaddsubfx.rc")
 
-INSTALL(FILES "lmms.exe.manifest" DESTINATION .)
 INSTALL(FILES "lmms.VisualElementsManifest.xml" DESTINATION .)
 INSTALL(DIRECTORY "assets" DESTINATION .)
