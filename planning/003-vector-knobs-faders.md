@@ -1,7 +1,7 @@
 # VS-003: Crisp Vector Knob Arcs and Fader Ticks
 
-- Status: Planned
-- Branch: `vibe-sweep`
+- Status: In progress
+- Branch: `vibe-sweep-vs-003`
 - Depends on: [VS-001](001-windows-baseline.md), [VS-002](002-high-dpi-scaling.md)
 
 ## Goal
@@ -31,4 +31,6 @@ Use native QPainter vector rendering and antialiasing for crisp knob arcs, indic
 - [ ] Rapid control movement and active mixer repainting remain responsive during playback; compare CPU/repaint behavior to baseline.
 - [ ] Windows build/native tests pass; focused geometry tests are added only for new nontrivial logic.
 
-Results: Not implemented or tested. Record screenshots, rendering decisions, and any custom-art compatibility limitations here.
+Results: Knob arcs and indicators now paint directly with antialiasing in logical coordinates, without the low-resolution image cache. Legacy artwork sizing uses its logical size and disabled artwork retains its device pixel ratio. Fader ticks use antialiased strokes snapped to physical pixels; their dB mapping and zero marker remain unchanged. Input handling is unchanged.
+
+Theme-provided knob bodies and default or custom fader handles remain artwork for compatibility, so raster assets may still blur when enlarged. Direct drawing may affect repaint performance. The unchanged Windows baseline passed its build, eight native tests, and three scripted checks. This change passed `git diff --check` and static review; the integrated build, visual checks at each scale, interactions, monitor transitions, and playback performance remain to be verified.
