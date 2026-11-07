@@ -24,6 +24,11 @@
 
 #include "TextFloat.h"
 
+#include <algorithm>
+
+#include <QEvent>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QTimer>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -61,6 +66,8 @@ TextFloat::TextFloat(const QString & title, const QString & text, const QPixmap 
 	titleAndTextLayout->addWidget(m_titleLabel);
 
 	m_textLabel = new QLabel(titleAndTextWidget);
+	m_titleLabel->setWordWrap(true);
+	m_textLabel->setWordWrap(true);
 	titleAndTextLayout->addWidget(m_textLabel);
 
 	mainLayout->addWidget(titleAndTextWidget);
@@ -87,6 +94,58 @@ void TextFloat::setPixmap(const QPixmap & pixmap)
 {
 	m_pixmapLabel->setPixmap(pixmap);
 	m_pixmapLabel->setHidden(pixmap.isNull());
+}
+
+void TextFloat::moveGlobal(QWidget* w, const QPoint& offset)
+{
+	if (m_positioning) { return; }
+	m_positioning = true;
+	m_anchor = w;
+	m_anchorOffset = offset;
+	QPoint position = w->mapToGlobal(QPoint(0, 0)) + offset;
+	QScreen* screen = QGuiApplication::screenAt(position);
+	if (!screen) { screen = w->screen(); }
+	if (screen)
+	{
+		const QRect available = screen->availableGeometry();
+		// Reserve the space occupied by the icon and layout margins.
+		m_titleLabel->setMaximumWidth(QWIDGETSIZE_MAX);
+		m_textLabel->setMaximumWidth(QWIDGETSIZE_MAX);
+		const int overhead = layout()->contentsMargins().left() + layout()->contentsMargins().right()
+			+ m_titleLabel->parentWidget()->layout()->contentsMargins().left()
+			+ m_titleLabel->parentWidget()->layout()->contentsMargins().right()
+			+ (m_pixmapLabel->isHidden() ? 0 : m_pixmapLabel->sizeHint().width() + layout()->spacing());
+		const int textWidth = std::max(1, available.width() - overhead);
+		m_titleLabel->setMaximumWidth(textWidth);
+		m_textLabel->setMaximumWidth(textWidth);
+		adjustSize();
+		position.setX(std::clamp(position.x(), available.left(),
+			std::max(available.left(), available.right() - width() + 1)));
+		position.setY(std::clamp(position.y(), available.top(),
+			std::max(available.top(), available.bottom() - height() + 1)));
+	}
+	else { adjustSize(); }
+	move(position);
+	m_positioning = false;
+}
+
+bool TextFloat::event(QEvent* event)
+{
+	const auto type = event->type();
+	const bool result = QWidget::event(event);
+	if ((type == QEvent::FontChange || type == QEvent::ApplicationFontChange ||
+		type == QEvent::ScreenChangeInternal
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+		|| type == QEvent::DevicePixelRatioChange
+#endif
+		) && m_anchor && !m_positioning)
+	{
+		// Defer until the inherited font and child layouts have received the event.
+		QTimer::singleShot(0, this, [this] {
+			if (m_anchor) { moveGlobal(m_anchor, m_anchorOffset); }
+		});
+	}
+	return result;
 }
 
 void TextFloat::setVisibilityTimeOut(int msecs)

@@ -1,6 +1,6 @@
 # VS-004: DPI-Aware LCD Labels and Floating Text
 
-- Status: Planned
+- Status: In progress
 - Branch: `vibe-sweep`
 - Depends on: [VS-002](002-high-dpi-scaling.md), [VS-003](003-vector-knobs-faders.md)
 
@@ -34,4 +34,6 @@ Replace inappropriate fixed pixel typography with dynamic sizing that responds t
 
 Reference: [Qt high-DPI model](https://doc.qt.io/qt-6/highdpi.html).
 
-Results: Not implemented or tested.
+Results: Implemented inherited-font LCD label sizing and painting with font metrics, including space for descenders and shadow, and refreshes geometry on font and screen changes. TextFloat retains inherited fonts, wraps text to the target screen width, and repositions when its font or screen changes. SimpleTextFloat already inherits its font and remains unchanged. The LCD digit atlas remains raster artwork and was not replaced.
+
+Validation: Added an offscreen Qt regression test using a synthetic LCD atlas for font-dependent geometry and observable digit rendering. The unchanged Windows baseline passed before implementation. The new build and test, mixed-monitor behavior, screenshots, and measured font/DPR values remain pending integrated native and visual verification. Very large icons or content taller than the screen may still exceed available geometry.

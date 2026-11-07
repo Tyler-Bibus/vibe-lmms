@@ -25,13 +25,16 @@
 
 
 
+#include <cmath>
+
+#include <QEvent>
+#include <QFontMetricsF>
 #include <QStyleOptionFrame>
 #include <QPainter>
 
 #include "LcdWidget.h"
 #include "DeprecationHelper.h"
 #include "embed.h"
-#include "FontHelper.h"
 
 
 namespace lmms::gui
@@ -206,18 +209,18 @@ void LcdWidget::paintEvent( QPaintEvent* )
 
 	p.resetTransform();
 
-	// Label
-	if( !m_label.isEmpty() )
+	// Measure and draw with the same inherited font in logical coordinates. Leave
+	// room for the descenders and the one-pixel shadow below the baseline.
+	if (!m_label.isEmpty())
 	{
-		p.setFont(adjustedToPixelSize(p.font(), DEFAULT_FONT_SIZE));
-		p.setPen( textShadowColor() );
-		p.drawText(width() / 2 -
-				p.fontMetrics().horizontalAdvance(m_label) / 2 + 1,
-						height(), m_label);
-		p.setPen( textColor() );
-		p.drawText(width() / 2 -
-				p.fontMetrics().horizontalAdvance(m_label) / 2,
-						height() - 1, m_label);
+		const QFontMetricsF metrics(font(), this);
+		const qreal x = (width() - metrics.horizontalAdvance(m_label)) / 2.0;
+		const qreal baseline = m_cellHeight + 2 + metrics.ascent();
+		p.setFont(font());
+		p.setPen(textShadowColor());
+		p.drawText(QPointF(x + 1, baseline + 1), m_label);
+		p.setPen(textColor());
+		p.drawText(QPointF(x, baseline), m_label);
 	}
 
 }
@@ -249,28 +252,42 @@ void LcdWidget::updateSize()
 	const int marginX1 = m_seamlessLeft ? 0 : 1 + m_marginWidth;
 	const int marginX2 = m_seamlessRight ? 0 : 1 + m_marginWidth;
 	const int marginY = 1;
-	if (m_label.isEmpty())
-	{
-		setFixedSize(
-			m_cellWidth * m_numDigits + marginX1 + marginX2,
-			m_cellHeight + (2 * marginY)
-		);
-	}
-	else
-	{
-		setFixedSize(
-			qMax<int>(
-				m_cellWidth * m_numDigits + marginX1 + marginX2,
-				QFontMetrics(adjustedToPixelSize(font(), DEFAULT_FONT_SIZE)).horizontalAdvance(m_label)
-			),
-			m_cellHeight + (2 * marginY) + 9
-		);
-	}
+	const QFontMetricsF metrics(font(), this);
+	const int labelWidth = m_label.isEmpty() ? 0 : static_cast<int>(std::ceil(metrics.horizontalAdvance(m_label))) + 2;
+	const int labelHeight = m_label.isEmpty() ? 0 : static_cast<int>(std::ceil(metrics.height())) + 1;
+	setFixedSize(qMax(m_cellWidth * m_numDigits + marginX1 + marginX2, labelWidth),
+		m_cellHeight + 2 * marginY + labelHeight);
 
 	update();
 }
 
 
+
+
+void LcdWidget::changeEvent(QEvent* event)
+{
+	QWidget::changeEvent(event);
+	if ((event->type() == QEvent::FontChange || event->type() == QEvent::ApplicationFontChange) && !m_lcdPixmap.isNull())
+	{
+		updateSize();
+	}
+}
+
+
+bool LcdWidget::event(QEvent* event)
+{
+	const auto type = event->type();
+	const bool result = QWidget::event(event);
+	if ((type == QEvent::ScreenChangeInternal
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+		|| type == QEvent::DevicePixelRatioChange
+#endif
+		) && !m_lcdPixmap.isNull())
+	{
+		updateSize();
+	}
+	return result;
+}
 
 
 void LcdWidget::initUi(const QString& name , const QString& style)

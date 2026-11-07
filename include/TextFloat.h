@@ -25,6 +25,7 @@
 #ifndef LMMS_GUI_TEXT_FLOAT_H
 #define LMMS_GUI_TEXT_FLOAT_H
 
+#include <QPointer>
 #include <QWidget>
 
 #include "lmms_export.h"
@@ -53,18 +54,20 @@ public:
 						int timeout = 2000,
 						QWidget * parent = nullptr);
 
-	void moveGlobal(QWidget * w, const QPoint & offset)
-	{
-		move(w->mapToGlobal(QPoint(0, 0)) + offset);
-	}
+	void moveGlobal(QWidget* w, const QPoint& offset);
 
 
 protected:
 	void mousePressEvent(QMouseEvent * me) override;
+	bool event(QEvent* event) override;
 
 
 private:
 	TextFloat(const QString & title, const QString & text, const QPixmap & pixmap);
+
+	QPointer<QWidget> m_anchor;
+	QPoint m_anchorOffset;
+	bool m_positioning = false;
 
 	QLabel * m_pixmapLabel;
 	QLabel * m_titleLabel;
