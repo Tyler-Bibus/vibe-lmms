@@ -363,6 +363,7 @@ int main( int argc, char * * argv )
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 	// High-DPI scaling is always enabled in Qt >= 6.0
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+	QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #endif
 
 	QCoreApplication * app = coreOnly ?
