@@ -1,7 +1,7 @@
 # VS-001: Initial Windows Build and Test Baseline
 
-- Status: Planned
-- Branch: `vibe-sweep`
+- Status: Native build and tests passed; GUI/audio smoke pending
+- Branch: `vibe-sweep-vs-001`
 - Prerequisites: implementation requested by the owner
 - Next: [VS-002](002-high-dpi-scaling.md)
 
@@ -44,11 +44,19 @@ Resolve runtime DLL and Qt platform-plugin discovery using the matching Qt/vcpkg
 
 ## Acceptance and evidence
 
-- [ ] Unchanged source revision and reproducible environment recorded.
-- [ ] Native Windows configure/build succeeds; complete logs retained.
-- [ ] All native tests pass; counts and failures/skips are recorded.
-- [ ] Scripted checks pass, or explicit blockers are recorded and resolved before accepting the baseline.
+- [x] Unchanged source revision and reproducible environment recorded.
+- [x] Native Windows configure/build succeeds; complete logs retained.
+- [x] All native tests pass; counts and failures/skips are recorded.
+- [x] Scripted checks pass, or explicit blockers are recorded and resolved before accepting the baseline.
 - [ ] Local launch, demo playback, project round-trip, and screenshots recorded.
 - [ ] Existing defects are documented separately from later regressions.
 
-Results: Not run. This issue gates application changes in VS-002 through VS-005.
+Results: Native build, all eight registered tests, and all scripted checks passed. GUI/audio smoke remains pending.
+
+## Baseline execution (2026-11-07)
+
+Source revision: `be5ac75e8d0fc43318d59452b785c623431f4c1d`. The application source and asset diff was empty; recursive submodules were initialized at their recorded revisions. Evidence is retained in the ignored `build/vibe-sweep/` directory of this worktree (`submodules.txt`, `source-diff.patch`, and logs). Host reports Windows build 26200; Visual Studio Community 2022 17.14.9 supplies MSVC 14.44.35207, CMake 3.31.6-msvc6 and Ninja 1.12.1. Qt 6.8.3 MSVC x64 was installed locally with aqtinstall 3.3.0. Workspace-local vcpkg revision is `6fdd23fa0a9479a9f9a1c48178696f60cf39255d` (tool 2026-10-29). Configure follows the MSVC CI settings with compile cache omitted; see `configure.log` for actual output.
+
+Scripted checks: `check-strings` and `check-namespace` passed on Windows with Python 3.13.3 and tinycss2 1.5.1 (zero errors each). `verify` initially failed on Windows with `WinError 32` while removing a temporary directory. It passed in WSL Ubuntu with an isolated `GIT_CONFIG_GLOBAL`; expected fixture errors in the log are assertions, followed by `SUCCESS`. No persistent global Git configuration was changed.
+
+The first configure completed dependency installation but failed because the installed MSVC 19.44 is below the project minimum 19.51. A workspace-local MSVC 14.51.36231 (compiler 19.51) was extracted from Microsoft VS 2026 channel packages; it uses the installed Windows SDK 10.0.26100 and the already built 14.44 vcpkg libraries. Local MSYS2 Perl 5.42.3 and its List::MoreUtils/XML::Parser modules satisfy the LADSPA generator. The portable setup disables the optional 32-bit VST bridge (`WANT_VST_32=OFF`); Qt 6, x64, RelWithDebInfo, official target architecture, and warnings-as-errors match the CI baseline. Compile caching was omitted. `configure-1451-perl.log` records successful configure and `build-1451.log` records all 1,462 build tasks completing successfully. `ctest.log` records 8/8 registered native tests passed, with matching CRT and Qt DLLs on PATH and `QT_QPA_PLATFORM=offscreen`. No tests were skipped. `install.log` and `windeployqt.log` record the staged installation; matching 14.51 CRT DLLs were copied app-local. The saved install is `build/vibe-sweep/baseline-install/lmms.exe`; use `QT_QPA_PLATFORM=windows` and an isolated config for GUI smoke. GUI launch, demo playback, project round-trip and screenshots remain pending; no claim of audio verification is made.
